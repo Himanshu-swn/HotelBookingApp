@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Layout from "./layouts/Layout";
 
 function App() {
   return (
-    <>
-      <h1>Hii Happy !!! Frontend is working fine.</h1>
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Layout></Layout>} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
