@@ -1,40 +1,57 @@
 import express, { Request, Response } from "express";
 import User from "../models/user";
 import jwt from "jsonwebtoken";
+import { check, validationResult } from "express-validator";
 
 const router = express.Router();
 
-router.post("/register", async (req: Request, res: Response) => {
-  try {
-    let user = await User.findOne({
-      email: req.body.email,
-    });
-
-    if (user) {
-      return res.status(400).json({ msg: "User already exists" });
+router.post(
+  "/register",
+  [
+    check("firstName", "firstname is required").isString(),
+    check("lastName", "lastName is required").isString(),
+    check("email", "email is required").isEmail(),
+    check("password", "password is required and should be atleast 6 characters").isLength({
+      min: 6,
+    }),
+  ],
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ msg: errors.array() });
     }
 
-    user = new User(req.body);
-    await user.save();
+    try {
+      let user = await User.findOne({
+        email: req.body.email,
+      });
 
-    const token = jwt.sign(
-      { userId: user.id },
-      process.env.JWT_SECRET_KEY as string,
-      {
-        expiresIn: "1d",
+      if (user) {
+        return res.status(400).json({ msg: "User already exists" });
       }
-    );
 
-    res.cookie("auth_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 86400000,
-    });
+      user = new User(req.body);
+      await user.save();
 
-    return res.sendStatus(200);
-  } catch (error) {
-    res.status(500).send({ msg: "something went wrong" });
+      const token = jwt.sign(
+        { userId: user.id },
+        process.env.JWT_SECRET_KEY as string,
+        {
+          expiresIn: "1d",
+        }
+      );
+
+      res.cookie("auth_token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 86400000,
+      });
+
+      return res.sendStatus(200);
+    } catch (error) {
+      res.status(500).send({ msg: "something went wrong" });
+    }
   }
-});
+);
 
 export default router;
