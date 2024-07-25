@@ -11,14 +11,17 @@ router.post(
     check("firstName", "firstname is required").isString(),
     check("lastName", "lastName is required").isString(),
     check("email", "email is required").isEmail(),
-    check("password", "password is required and should be atleast 6 characters").isLength({
+    check(
+      "password",
+      "password is required and should be atleast 6 characters"
+    ).isLength({
       min: 6,
     }),
   ],
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ msg: errors.array() });
+      return res.status(400).json({ message: errors.array() });
     }
 
     try {
@@ -27,7 +30,7 @@ router.post(
       });
 
       if (user) {
-        return res.status(400).json({ msg: "User already exists" });
+        return res.status(400).json({ message: "User already exists" });
       }
 
       user = new User(req.body);
@@ -47,9 +50,9 @@ router.post(
         maxAge: 86400000,
       });
 
-      return res.sendStatus(200);
+      return res.status(200).send({ message: "user registered OK !" });
     } catch (error) {
-      res.status(500).send({ msg: "something went wrong" });
+      res.status(500).send({ message: "something went wrong" });
     }
   }
 );

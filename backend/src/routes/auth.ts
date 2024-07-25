@@ -21,7 +21,7 @@ router.post(
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      return res.status(400).json({ msg: errors.array() });
+      return res.status(400).json({ message: errors.array() });
     }
 
     const { email, password } = req.body;
@@ -30,13 +30,13 @@ router.post(
       const user = await User.findOne({ email });
 
       if (!user) {
-        return res.status(400).json({ msg: " invalid credentials1" });
+        return res.status(400).json({ message: " invalid credentials1" });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
 
       if (!isMatch) {
-        return res.status(400).json({ msg: " invalid credentials2" });
+        return res.status(400).json({ message: " invalid credentials2" });
       }
 
       const token = jwt.sign(
@@ -53,7 +53,7 @@ router.post(
       res.status(200).json({ userId: user.id });
     } catch (error) {
       console.log(error);
-      res.status(500).json({ msg: "something went wrong" });
+      res.status(500).json({ message: "something went wrong" });
     }
   }
 );
